@@ -1,6 +1,44 @@
 import os
+import re
 import asyncio
+from google import genai
+from dotenv import load_dotenv
 from fetch_problem import fetch_daily_problem, fetch_daily_problem_details
+
+load_dotenv()
+
+def extract_code(text):
+    match= re.search(r"```(?:python)?\s*(.*?)\s*```", text, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return text.strip()
+
+async def gemini_solver(description, template):
+    client= genai.Client()
+
+    prompt = f"""
+    You are an expert software engineer solving LeetCode problems in Python.
+    
+    Problem Description:
+    {description}
+    
+    Python Code Template:
+    {template}
+    
+    Write the complete Python solution matching the class and method structure of the template.
+    Your code must be clean, syntactically correct, and optimized for performance.
+    Return ONLY the executable Python code. Do not write explanation text. 
+    You may wrap your code in ```python ... ``` block. Also don't write any comment in the Code.
+    """
+
+    print("[Gemini] Requesting solution from gemini-2.5-flash...")
+    response= await client.aio.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+
+    return extract_code(response.text)
+
 
 def find_local_sol(prob_id, difficulty):
     initial_id= str(prob_id).zfill(4)
@@ -28,7 +66,11 @@ async def main():
         print("LOCAL SOLUTION: \n")
         print(local_code)
     else:
-        print("Calling Fallback to Gemini")
+        print("Calling Fallback to Gemini...")
+
+        code= await gemini_solver(details['description'], details['python_template'])
+        print('GEMINI SOLUTION: \n')
+        print(code)
 
 if __name__=="__main__":
     asyncio.run(main())
