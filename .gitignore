@@ -1,0 +1,9 @@
+.env
+*session.json
+*config.json
+history.json
+
+__pycache__/
+*.pyc
+
+local_solutions/
