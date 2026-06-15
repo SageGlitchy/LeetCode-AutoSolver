@@ -97,6 +97,7 @@ async def fetch_daily_problem_details(title_slug):
 
         return {
             "id": question_data['questionFrontendId'],
+            "internal_id": question_data['questionId'],
             "title": question_data['title'],
             "difficulty": question_data['difficulty'],
             "description": clean_desc,

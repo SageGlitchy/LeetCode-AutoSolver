@@ -1,7 +1,7 @@
 import os
 import re
 import asyncio
-from google import genai
+from groq import AsyncGroq
 from dotenv import load_dotenv
 from fetch_problem import fetch_daily_problem, fetch_daily_problem_details
 
@@ -13,8 +13,8 @@ def extract_code(text):
         return match.group(1).strip()
     return text.strip()
 
-async def gemini_solver(description, template):
-    client= genai.Client()
+async def groq_solver(description, template):
+    client= AsyncGroq()
 
     prompt = f"""
     You are an expert software engineer solving LeetCode problems in Python.
@@ -31,22 +31,30 @@ async def gemini_solver(description, template):
     You may wrap your code in ```python ... ``` block. Also don't write any comment in the Code.
     """
 
-    print("[Gemini] Requesting solution from gemini-2.5-flash...")
+    print("[Groq] Requesting solution from gemini-2.5-flash...")
 
     max_retries= 5
     for attempt in range(max_retries):
         try:
-            response= await client.aio.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
+            response= await client.chat.completions.create(
+                messages=[
+                    {
+                        "role":"user",
+                        "content":prompt,
+                    }
+                ],
+                model= "llama-3.3-70b-versatile"
             )
+
+            code= response.choices[0].message.content
+            return extract_code(code)
+
         except Exception as e:
             if attempt<=max_retries:
-                wait_time= 3*(attempt+1)
-
-                await asyncio.sleep(wait_time)
+                print(f"Attempt {attempt} failed.")
+                await asyncio.sleep(60)
             else:
-                print("All Gemini attempts failed.")
+                print("All attempts failed.")
                 raise e
 
 
