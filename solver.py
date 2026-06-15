@@ -32,10 +32,24 @@ async def gemini_solver(description, template):
     """
 
     print("[Gemini] Requesting solution from gemini-2.5-flash...")
-    response= await client.aio.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
+
+    max_retries= 5
+    for attempt in range(max_retries):
+        try:
+            response= await client.aio.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+        except Exception as e:
+            if attempt<=max_retries:
+                wait_time= 3*(attempt+1)
+
+                await asyncio.sleep(wait_time)
+            else:
+                print("All Gemini attempts failed.")
+                raise e
+
+
 
     return extract_code(response.text)
 
