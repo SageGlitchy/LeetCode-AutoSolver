@@ -50,9 +50,9 @@ async def groq_solver(description, template):
             return extract_code(code)
 
         except Exception as e:
-            if attempt<=max_retries:
+            if attempt<max_retries-1:
                 print(f"Attempt {attempt} failed.")
-                await asyncio.sleep(60)
+                await asyncio.sleep(20)
             else:
                 print("All attempts failed.")
                 raise e
