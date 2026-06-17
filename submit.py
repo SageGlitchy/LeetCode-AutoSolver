@@ -129,6 +129,10 @@ async def main():
                 f.write(code)
             print(f"Solution successfully saved to {file_path}")
 
+            # Append the ID to solved_problems.txt
+            with open("solved_problems.txt", "a") as f:
+                f.write(f"{problem_id}\n")
+
         else:
             print(f"Error: {status}")
 

@@ -57,11 +57,6 @@ async def groq_solver(description, template):
                 print("All attempts failed.")
                 raise e
 
-
-
-    return extract_code(response.text)
-
-
 def find_local_sol(prob_id, difficulty):
     initial_id= str(prob_id).zfill(4)
 
@@ -88,9 +83,9 @@ async def main():
         print("LOCAL SOLUTION: \n")
         print(local_code)
     else:
-        print("Calling Fallback to Gemini...")
+        print("Calling Fallback to Groq...")
 
-        code= await gemini_solver(details['description'], details['python_template'])
+        code= await groq_solver(details['description'], details['python_template'])
         print('GEMINI SOLUTION: \n')
         print(code)
 
