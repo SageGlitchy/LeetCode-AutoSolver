@@ -159,8 +159,8 @@ async def main():
     random_slugs= await fetch_unsolved_problems(count=RANDOM_PROBLEMS)
 
     for i, slug in enumerate(random_slugs, start=1):
-        print(f"\nWaiting 30 seconds before next problem...")
-        await asyncio.sleep(30)
+        print(f"\nWaiting 60 seconds before next problem...")
+        await asyncio.sleep(60)
         print(f"--- Random Problem {i}/{len(random_slugs)} ---")
         await solve_and_submit_problem(slug)
 
