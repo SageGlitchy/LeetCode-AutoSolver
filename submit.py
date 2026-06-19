@@ -2,6 +2,7 @@ import json
 import os
 import httpx
 import asyncio
+import random
 from fetch_problem import fetch_daily_problem, fetch_daily_problem_details, fetch_unsolved_problems
 from solver import groq_solver 
 
@@ -148,7 +149,7 @@ async def solve_and_submit_problem(slug):
 
 
 async def main():
-    RANDOM_PROBLEMS = 3  # Adjust between 2-5
+    RANDOM_PROBLEMS = random.randint(2,5)  # Adjust between 2-5
 
     print("--- [STEP 1] Daily Challenge ---")
     daily_slug= await fetch_daily_problem()
