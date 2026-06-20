@@ -26,7 +26,7 @@ async def groq_solver(description, template):
     {template}
     
     Write the complete Python solution matching the class and method structure of the template.
-    Your code must be clean, syntactically correct, and optimized for performance.
+    Your code must be clean, syntactically correct, and optimized for performance according to the constraints.
     Return ONLY the executable Python code. Do not write explanation text. 
     You may wrap your code in ```python ... ``` block. Also don't write any comment in the Code.
     """
@@ -56,3 +56,19 @@ async def groq_solver(description, template):
             else:
                 print("All attempts failed.")
                 raise e
+
+async def main():
+    from fetch_problem import fetch_daily_problem, fetch_daily_problem_details
+    
+    daily_slug = await fetch_daily_problem()
+    details = await fetch_daily_problem_details(daily_slug)
+    
+    print(f"Testing Groq Solver on Problem #{details['id']}: {details['title']}...")
+    code = await groq_solver(details['description'], details['python_template'])
+    
+    print("\n--- GENERATED CODE ---")
+    print(code)
+    print("----------------------\n")
+
+if __name__ == "__main__":
+    asyncio.run(main())

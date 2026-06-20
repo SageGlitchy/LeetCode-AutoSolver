@@ -147,22 +147,42 @@ async def solve_and_submit_problem(slug):
     else:
         print("Polling timed out.")
 
-
 async def main():
-    RANDOM_PROBLEMS = random.randint(2,5)  # Adjust between 2-5
-
-    print("--- [STEP 1] Daily Challenge ---")
-    daily_slug= await fetch_daily_problem()
-    await solve_and_submit_problem(daily_slug)
-
-    print(f"\n--- [STEP 2] Fetching {RANDOM_PROBLEMS} Random Unsolved Problems ---")
-    random_slugs= await fetch_unsolved_problems(count=RANDOM_PROBLEMS)
-
-    for i, slug in enumerate(random_slugs, start=1):
-        print(f"\nWaiting 60 seconds before next problem...")
-        await asyncio.sleep(60)
-        print(f"--- Random Problem {i}/{len(random_slugs)} ---")
-        await solve_and_submit_problem(slug)
+    import argparse
+    import random
+    
+    parser = argparse.ArgumentParser(description="LeetCode Auto-Solver and Submitter")
+    parser.add_argument("--mode", choices=["daily", "random", "all"], default="all",
+                        help="Execution mode: daily (only daily), random (only random unsolved), or all (both)")
+    args = parser.parse_args()
+    
+    # 1. Fetch and process daily challenge problem
+    if args.mode in ("daily", "all"):
+        print("=" * 60)
+        print("DAILY CHALLENGE MODE")
+        print("=" * 60)
+        daily_slug = await fetch_daily_problem()
+        await solve_and_submit_problem(daily_slug)
+        
+    # 2. Fetch and process random unsolved Medium/Easy problems
+    if args.mode in ("random", "all"):
+        RANDOM_PROBLEMS = random.randint(2, 5)  # Adjust between 2-5
+        print("\n" + "=" * 60)
+        print("RANDOM UNSOLVED MODE")
+        print("=" * 60)
+        random_slugs = await fetch_unsolved_problems(count=RANDOM_PROBLEMS)
+        print(f"Selected problems to solve: {random_slugs}")
+        
+        for i, slug in enumerate(random_slugs, start=1):
+            # Mimic human delay between problems to prevent bot flags/rate limiting
+            sleep_time = 60
+            print(f"\nWaiting {sleep_time} seconds before starting problem {i}/{len(random_slugs)}...")
+            await asyncio.sleep(sleep_time)
+            
+            print("\n" + "-" * 50)
+            print(f"SOLVING EXTRA PROBLEM {i} OF {len(random_slugs)}: {slug}")
+            print("-" * 50)
+            await solve_and_submit_problem(slug)
 
 
 if __name__=="__main__":
