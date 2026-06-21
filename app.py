@@ -287,9 +287,7 @@ async def run_auto_solve_pipeline():
             print(f"Pipeline encountered critical exception: {e}")
         finally:
             is_running = False
-            print(f"\n==================================================")
             print(f"LEETCODE PIPELINE RUN COMPLETE")
-            print(f"==================================================")
 
 def configure_scheduler():
     config = load_config()
