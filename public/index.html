@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode Auto-Solver Dashboard</title>
+    <meta name="description" content="Automated LeetCode solver client orchestration, analytics, scheduling, and control panel.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-brain-circuit glow-text"></i>
+                    <span>Sage<span class="gradient-text">Glitchy</span></span>
+                </div>
+                <div class="subtitle">LeetCode Auto-Solver</div>
+            </div>
+            <nav class="sidebar-nav">
+                <button id="nav-btn-dashboard" class="nav-item active" onclick="switchTab('dashboard')">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </button>
+                <button id="nav-btn-history" class="nav-item" onclick="switchTab('history')">
+                    <i class="fa-solid fa-clock-rotate-left"></i> History Logs
+                </button>
+                <button id="nav-btn-settings" class="nav-item" onclick="switchTab('settings')">
+                    <i class="fa-solid fa-sliders"></i> Settings
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="pulse-dot green" id="header-cookie-dot"></span>
+                    <span id="header-cookie-status">Checking connection...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- TAB: DASHBOARD -->
+            <section id="tab-content-dashboard" class="tab-content active">
+                <header class="content-header">
+                    <h1>Solver Dashboard</h1>
+                    <div class="header-actions">
+                        <button id="btn-trigger-run" class="btn btn-primary" onclick="triggerRun()">
+                            <i class="fa-solid fa-play"></i> Run Solver Now
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Grid of metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card glass-panel">
+                        <div class="metric-icon purple-glow"><i class="fa-solid fa-square-check"></i></div>
+                        <div class="metric-details">
+                            <h3>Total Solved</h3>
+                            <div class="metric-value" id="val-solved-count">0</div>
+                            <p class="metric-desc">Problems stored in archive</p>
+                        </div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <div class="metric-icon teal-glow" id="status-running-icon"><i class="fa-solid fa-circle-notch"></i></div>
+                        <div class="metric-details">
+                            <h3>System State</h3>
+                            <div class="metric-value" id="val-system-state">Idle</div>
+                            <p class="metric-desc" id="val-system-state-desc">Ready for tasks</p>
+                        </div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <div class="metric-icon orange-glow"><i class="fa-solid fa-calendar-days"></i></div>
+                        <div class="metric-details">
+                            <h3>Next Run Time</h3>
+                            <div class="metric-value" id="val-next-run">--:--</div>
+                            <p class="metric-desc" id="val-next-run-desc">Scheduled daily task</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Console Terminal Log -->
+                <div class="console-section glass-panel">
+                    <div class="console-header">
+                        <div class="console-title">
+                            <i class="fa-solid fa-terminal"></i> Live Execution Terminal
+                        </div>
+                        <div class="console-controls">
+                            <button id="btn-clear-console" class="btn btn-icon" title="Clear console output" onclick="clearConsole()">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                            <span class="console-status-badge" id="ws-status-badge">Disconnected</span>
+                        </div>
+                    </div>
+                    <div class="console-body" id="console-output">
+                        <div class="console-line system-msg">System loaded. Connecting to execution stream...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: HISTORY LOGS -->
+            <section id="tab-content-history" class="tab-content">
+                <header class="content-header">
+                    <h1>Submission History</h1>
+                </header>
+
+                <div class="glass-panel table-container">
+                    <table class="history-table" id="history-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Problem ID</th>
+                                <th>Title</th>
+                                <th>Difficulty</th>
+                                <th>Status</th>
+                                <th>Runtime</th>
+                                <th>Memory</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <tr>
+                                <td colspan="8" class="table-empty">No run history recorded yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB: SETTINGS -->
+            <section id="tab-content-settings" class="tab-content">
+                <header class="content-header">
+                    <h1>Scheduler & Orchestrator Settings</h1>
+                </header>
+
+                <div class="glass-panel settings-panel-body">
+                    <form id="settings-form" onsubmit="event.preventDefault(); saveSettings();">
+                        <div class="form-section">
+                            <h2><i class="fa-solid fa-clock"></i> Automation & Scheduling</h2>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="input-run-time">Daily Scheduled Trigger (Local Time)</label>
+                                    <input type="time" id="input-run-time" required>
+                                    <span class="input-help">The dashboard background service will run at this time every day.</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="input-extra-count">Random Unsolved Problems to Fetch</label>
+                                    <input type="number" id="input-extra-count" min="0" max="10" required>
+                                    <span class="input-help">Number of additional unsolved problems to solve per trigger.</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Target Problem Difficulties</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="check-diff-easy" value="Easy">
+                                        <span class="custom-checkbox"></span> Easy
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="check-diff-medium" value="Medium">
+                                        <span class="custom-checkbox"></span> Medium
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="check-diff-hard" value="Hard">
+                                        <span class="custom-checkbox"></span> Hard
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h2><i class="fa-solid fa-key"></i> API Keys & Credentials</h2>
+                            <div class="form-group">
+                                <label for="input-groq-api-key">Groq API Key</label>
+                                <div class="input-password-wrapper">
+                                    <input type="password" id="input-groq-api-key" placeholder="gsk_...">
+                                    <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('input-groq-api-key')">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                                <span class="input-help">Required for querying the Llama-3.3 model. Saved to .env locally.</span>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h2><i class="fa-solid fa-cookie-bite"></i> LeetCode Session Cookies</h2>
+                            <div class="form-group">
+                                <label for="input-lc-session">LeetCode Session (LEETCODE_SESSION)</label>
+                                <textarea id="input-lc-session" rows="2" placeholder="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."></textarea>
+                                <span class="input-help">The primary session cookie extracted from your browser.</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-lc-csrf">CSRF Token (csrftoken)</label>
+                                <input type="text" id="input-lc-csrf" placeholder="e1a8a7df...">
+                                <span class="input-help">Security token required for authenticated POST submission requests.</span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="btn-save-settings" class="btn btn-primary">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Settings
+                            </button>
+                            <span id="settings-save-status" class="save-status-msg"></span>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
