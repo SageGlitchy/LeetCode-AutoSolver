@@ -1,21 +1,10 @@
 import re
 import asyncio
-import os
 from groq import AsyncGroq
 from dotenv import load_dotenv
 
 load_dotenv()
 
-def find_local_sol(problem_id, difficulty):
-    padded_id = str(problem_id).zfill(4)
-    file_path = os.path.join("local_solutions", difficulty, f"{padded_id}.py")
-    if os.path.exists(file_path):
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                return f.read()
-        except Exception:
-            return None
-    return None
 
 def extract_code(text):
     match= re.search(r"```(?:python)?\s*(.*?)\s*```", text, re.DOTALL)
