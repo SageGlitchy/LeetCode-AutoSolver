@@ -68,7 +68,6 @@ async def main():
     
     print("\n--- GENERATED CODE ---")
     print(code)
-    print("----------------------\n")
 
 if __name__ == "__main__":
     asyncio.run(main())
