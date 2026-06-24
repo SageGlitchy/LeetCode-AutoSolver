@@ -22,6 +22,17 @@ def load_solved_problems():
     except FileNotFoundError:
         return set()
 
+def print_cloudflare_warning(slug):
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+    print(f"\n{RED}{BOLD}============================================================{RESET}")
+    print(f"{RED}{BOLD}[CLOUDFLARE BLOCK] LeetCode blocked this submission via Turnstile.{RESET}")
+    print(f"{RED}Please open your browser and solve this problem manually:{RESET}")
+    print(f"{RED}{BOLD}Link: https://leetcode.com/problems/{slug}/{RESET}")
+    print(f"{RED}{BOLD}============================================================{RESET}\n")
+
+
 async def submit_sol(slug, prob_id, code):
     session_data= load_session()
     session_cookie= session_data["LEETCODE_SESSION"]
@@ -53,8 +64,12 @@ async def submit_sol(slug, prob_id, code):
             save_session(session_data)
         
         if response.status_code != 200:
-            print(f"Error Code {response.status_code}: ",response.text)
+            if response.status_code == 403 or "Just a moment..." in response.text:
+                print_cloudflare_warning(slug)
+            else:
+                print(f"Error Code {response.status_code}: ", response.text)
             return None
+
 
         data= response.json()
         submission_id= data.get("submission_id")
