@@ -169,6 +169,8 @@ async def main():
     parser = argparse.ArgumentParser(description="LeetCode Auto-Solver and Submitter")
     parser.add_argument("--mode", choices=["daily", "random", "all"], default="all",
                         help="Execution mode: daily (only daily), random (only random unsolved), or all (both)")
+    parser.add_argument("--count", type= int, default= None, help= "Number of random problems to solve (default: random between 2-5)")
+
     args = parser.parse_args()
     
     # 1. Fetch and process daily challenge problem
@@ -181,10 +183,13 @@ async def main():
         
     # 2. Fetch and process random unsolved Medium/Easy problems
     if args.mode in ("random", "all"):
-        RANDOM_PROBLEMS = random.randint(2, 5)  # Adjust between 2-5
-        print("\n" + "=" * 60)
+        if args.count is not None:
+            RANDOM_PROBLEMS= args.count
+        else:
+            RANDOM_PROBLEMS = random.randint(2, 5)  # Adjust between 2-5
+        print("\n" + "=" * 30)
         print("RANDOM UNSOLVED MODE")
-        print("=" * 60)
+        print("=" * 30)
         random_slugs = await fetch_unsolved_problems(count=RANDOM_PROBLEMS)
         print(f"Selected problems to solve: {random_slugs}")
         

@@ -41,7 +41,7 @@ async def fetch_daily_problem():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=20.0) as client:
 
         response= await client.post(url, json=payload, headers=headers)
 
@@ -82,7 +82,7 @@ async def fetch_daily_problem_details(title_slug):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=20.0) as client:
         response= await client.post(url, json=payload, headers= headers)
         data = response.json()
 
@@ -146,7 +146,7 @@ async def fetch_unsolved_problems(count=random.randint(2,5), difficulties=["Easy
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=20.0) as client:
         response = await client.post(url, json=payload, headers=headers)
         if response.status_code != 200:
             print(f"Error fetching question list: {response.status_code}")
