@@ -2,6 +2,7 @@ import re
 import asyncio
 from groq import AsyncGroq
 from dotenv import load_dotenv
+from fetch_problem import fetch_daily_problem, fetch_daily_problem_details
 
 load_dotenv()
 
@@ -31,7 +32,7 @@ async def groq_solver(description, template):
     You may wrap your code in ```python ... ``` block. Also don't write any comment in the Code.
     """
 
-    print("[Groq] Requesting solution from llama-3.3-70b-versatile...")
+    print("[Groq] Requesting solution from openai/gpt-oss-120b...")
 
     max_retries= 5
     for attempt in range(max_retries):
@@ -58,7 +59,6 @@ async def groq_solver(description, template):
                 raise e
 
 async def main():
-    from fetch_problem import fetch_daily_problem, fetch_daily_problem_details
     
     daily_slug = await fetch_daily_problem()
     details = await fetch_daily_problem_details(daily_slug)

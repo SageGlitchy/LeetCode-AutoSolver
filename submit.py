@@ -186,7 +186,7 @@ async def main():
         if args.count is not None:
             RANDOM_PROBLEMS= args.count
         else:
-            RANDOM_PROBLEMS = random.randint(2, 5)  # Adjust between 2-5
+            RANDOM_PROBLEMS = random.randint(2, 4)  # Adjust between 2-4
         print("\n" + "=" * 30)
         print("RANDOM UNSOLVED MODE")
         print("=" * 30)
@@ -204,21 +204,6 @@ async def main():
             print("-" * 50)
             await solve_and_submit_problem(slug)
 
-
 if __name__=="__main__":
     asyncio.run(main())
-
-
             
-
-
-
-
-
-
-
-
-
-
-
-
