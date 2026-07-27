@@ -3,6 +3,7 @@ import asyncio
 import re
 import os
 import random
+import json
 
 
 def clean_html(html_str):
@@ -113,6 +114,26 @@ async def fetch_unsolved_problems(count=random.randint(2,5), difficulties=["Easy
         with open("solved_problems.txt", "r") as f:
             solved_set = {line.strip() for line in f if line.strip()}
 
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Content-Type": "application/json"
+    }
+    
+    filters = {}
+    if os.path.exists("session.json"):
+        try:
+            with open("session.json", "r") as f:
+                session_data = json.load(f)
+            session_cookie = session_data.get("LEETCODE_SESSION")
+            csrf_cookie = session_data.get("csrftoken")
+            if session_cookie and csrf_cookie:
+                headers["Cookie"] = f"LEETCODE_SESSION={session_cookie}; csrftoken={csrf_cookie}"
+                headers["X-CSRFToken"] = csrf_cookie
+                headers["Referer"] = "https://leetcode.com/problemset/all/"
+                filters["status"] = "NOT_STARTED"
+        except Exception as e:
+            print(f"Warning loading session: {e}")
+
     url = "https://leetcode.com/graphql"
     query = """
     query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $filters: QuestionListFilterInput) {
@@ -122,6 +143,7 @@ async def fetch_unsolved_problems(count=random.randint(2,5), difficulties=["Easy
             skip: $skip
             filters: $filters
         ) {
+            totalNum
             questions: data {
                 frontendQuestionId: questionFrontendId
                 titleSlug
@@ -132,28 +154,48 @@ async def fetch_unsolved_problems(count=random.randint(2,5), difficulties=["Easy
     }
     """
 
-    payload = {
-        "query": query,
-        "variables": {
-            "categorySlug": "",
-            "skip": 0,
-            "limit": 200,
-            "filters": {}
-        }
-    }
-
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-    }
-
     async with httpx.AsyncClient(timeout=20.0) as client:
-        response = await client.post(url, json=payload, headers=headers)
-        if response.status_code != 200:
-            print(f"Error fetching question list: {response.status_code}")
+        # Step 1: Get total matching questions to properly pick a random skip offset
+        payload1 = {
+            "query": query,
+            "variables": {
+                "categorySlug": "",
+                "skip": 0,
+                "limit": 1,
+                "filters": filters
+            }
+        }
+        
+        response1 = await client.post(url, json=payload1, headers=headers)
+        if response1.status_code != 200:
+            print(f"Error fetching question total: {response1.status_code}")
             return []
 
-        data = response.json()
-        questions = data["data"]["problemsetQuestionList"]["questions"]
+        data1 = response1.json()
+        total_num = data1["data"]["problemsetQuestionList"]["totalNum"]
+
+        # Step 2: Fetch a random slice of questions using the random skip
+        limit_val = 100
+        max_skip = max(0, total_num - limit_val)
+        random_skip = random.randint(0, max_skip)
+
+        payload2 = {
+            "query": query,
+            "variables": {
+                "categorySlug": "",
+                "skip": random_skip,
+                "limit": limit_val,
+                "filters": filters
+            }
+        }
+
+        response2 = await client.post(url, json=payload2, headers=headers)
+        if response2.status_code != 200:
+            print(f"Error fetching question list: {response2.status_code}")
+            return []
+
+        data2 = response2.json()
+        questions = data2["data"]["problemsetQuestionList"]["questions"]
 
         candidates = []
         for q in questions:

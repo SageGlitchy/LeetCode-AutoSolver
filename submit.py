@@ -17,7 +17,7 @@ def save_session(session_data):
 
 def load_solved_problems():
     try:
-        with open("solved_problems.txt", "r") as f:
+        with open("local_solutions/solved_problems.txt", "r") as f:
             return {line.strip() for line in f if line.strip()}
     except FileNotFoundError:
         return set()
@@ -149,7 +149,7 @@ async def solve_and_submit_problem(slug):
                 f.write(code)
             print(f"Saved to {file_path}")
 
-            with open("solved_problems.txt", "a") as f:
+            with open("local_solutions/solved_problems.txt", "a") as f:
                 f.write(f"{problem_id}\n")
         else:
             print(f"Status: {status}")
