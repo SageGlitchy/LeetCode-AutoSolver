@@ -126,6 +126,9 @@ async def solve_and_submit_problem(slug):
     print("\n[Generated Code]")
     print(code)
 
+    if not code:
+        print("Error: No code Generated")
+        return
     sub_id= await submit_sol(slug, internal_id, code)
     if not sub_id:
         print("Error: Could not submit.")

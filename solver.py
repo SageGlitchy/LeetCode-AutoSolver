@@ -65,7 +65,9 @@ async def main():
     
     print(f"Testing Groq Solver on Problem #{details['id']}: {details['title']}...")
     code = await groq_solver(details['description'], details['python_template'])
-    
+    if not code:
+        print("No code generated")
+        return
     print("\nGENERATED CODE :")
     print(code)
 
